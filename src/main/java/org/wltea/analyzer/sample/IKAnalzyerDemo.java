@@ -78,6 +78,7 @@ public class IKAnalzyerDemo {
 				e.printStackTrace();
 		      }
 			}
+			analyzer.close();
 	    }
 		
 	}

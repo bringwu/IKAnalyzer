@@ -99,4 +99,15 @@ class CharacterUtil {
         
         return input;
 	}
+	
+//	public static void main(String[] args) {
+//		char c = 12288;
+//		System.out.println((int)c+":"+c);
+//		c = 32;
+//		System.out.println((int)c+":"+c);
+//		c = 65280;
+//		System.out.println((int)c+":"+c);
+//		c = 65375;
+//		System.out.println((int)c+":"+c);
+//	}
 }

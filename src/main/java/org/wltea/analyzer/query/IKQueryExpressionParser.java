@@ -32,6 +32,7 @@ import java.util.Stack;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
@@ -465,7 +466,7 @@ public class IKQueryExpressionParser {
 			return null;
 		}
 		
-		BooleanQuery resultQuery = new BooleanQuery();
+		Builder builder = new BooleanQuery.Builder();
 
 		if(this.querys.size() == 1){
 			return this.querys.get(0);
@@ -476,14 +477,13 @@ public class IKQueryExpressionParser {
 		if('&' == op.type){
 			if(q1 != null){
 				if(q1 instanceof BooleanQuery){
-					BooleanClause[] clauses = ((BooleanQuery)q1).getClauses();
-					if(clauses.length > 0 
-							&& clauses[0].getOccur() == Occur.MUST){
+					List<BooleanClause> clauses = ((BooleanQuery)q1).clauses();
+					if(clauses.size() > 0 && clauses.get(0).getOccur() == Occur.MUST){
 						for(BooleanClause c : clauses){
-							resultQuery.add(c);
+							builder.add(c);
 						}					
 					}else{
-						resultQuery.add(q1,Occur.MUST);
+						builder.add(q1,Occur.MUST);
 					}
 
 				}else{
@@ -491,20 +491,20 @@ public class IKQueryExpressionParser {
 					//q1 instanceof TermRangeQuery 
 					//q1 instanceof PhraseQuery
 					//others
-					resultQuery.add(q1,Occur.MUST);
+					builder.add(q1,Occur.MUST);
 				}
 			}
 			
 			if(q2 != null){
 				if(q2 instanceof BooleanQuery){
-					BooleanClause[] clauses = ((BooleanQuery)q2).getClauses();
-					if(clauses.length > 0 
-							&& clauses[0].getOccur() == Occur.MUST){
+					List<BooleanClause> clauses = ((BooleanQuery)q2).clauses();
+					if(clauses.size() > 0 
+							&& clauses.get(0).getOccur() == Occur.MUST){
 						for(BooleanClause c : clauses){
-							resultQuery.add(c);
+							builder.add(c);
 						}					
 					}else{
-						resultQuery.add(q2,Occur.MUST);
+						builder.add(q2,Occur.MUST);
 					}
 					
 				}else{
@@ -512,21 +512,21 @@ public class IKQueryExpressionParser {
 					//q1 instanceof TermRangeQuery 
 					//q1 instanceof PhraseQuery
 					//others
-					resultQuery.add(q2,Occur.MUST);
+					builder.add(q2,Occur.MUST);
 				}
 			}
 			
 		}else if('|' == op.type){
 			if(q1 != null){
 				if(q1 instanceof BooleanQuery){
-					BooleanClause[] clauses = ((BooleanQuery)q1).getClauses();
-					if(clauses.length > 0 
-							&& clauses[0].getOccur() == Occur.SHOULD){
+					List<BooleanClause> clauses = ((BooleanQuery)q1).clauses();
+					if(clauses.size() > 0 
+							&& clauses.get(0).getOccur() == Occur.SHOULD){
 						for(BooleanClause c : clauses){
-							resultQuery.add(c);
+							builder.add(c);
 						}					
 					}else{
-						resultQuery.add(q1,Occur.SHOULD);
+						builder.add(q1,Occur.SHOULD);
 					}
 					
 				}else{
@@ -534,27 +534,27 @@ public class IKQueryExpressionParser {
 					//q1 instanceof TermRangeQuery 
 					//q1 instanceof PhraseQuery
 					//others
-					resultQuery.add(q1,Occur.SHOULD);
+					builder.add(q1,Occur.SHOULD);
 				}
 			}
 			
 			if(q2 != null){
 				if(q2 instanceof BooleanQuery){
-					BooleanClause[] clauses = ((BooleanQuery)q2).getClauses();
-					if(clauses.length > 0 
-							&& clauses[0].getOccur() == Occur.SHOULD){
+					List<BooleanClause> clauses = ((BooleanQuery)q2).clauses();
+					if(clauses.size() > 0 
+							&& clauses.get(0).getOccur() == Occur.SHOULD){
 						for(BooleanClause c : clauses){
-							resultQuery.add(c);
+							builder.add(c);
 						}					
 					}else{
-						resultQuery.add(q2,Occur.SHOULD);
+						builder.add(q2,Occur.SHOULD);
 					}
 				}else{
 					//q2 instanceof TermQuery 
 					//q2 instanceof TermRangeQuery 
 					//q2 instanceof PhraseQuery
 					//others
-					resultQuery.add(q2,Occur.SHOULD);
+					builder.add(q2,Occur.SHOULD);
 					
 				}
 			}
@@ -565,13 +565,13 @@ public class IKQueryExpressionParser {
 			}
 			
 			if(q1 instanceof BooleanQuery){
-				BooleanClause[] clauses = ((BooleanQuery)q1).getClauses();
-				if(clauses.length > 0){
+				List<BooleanClause> clauses = ((BooleanQuery)q1).clauses();
+				if(clauses.size() > 0){
 					for(BooleanClause c : clauses){
-						resultQuery.add(c);
+						builder.add(c);
 					}					
 				}else{
-					resultQuery.add(q1,Occur.MUST);
+					builder.add(q1,Occur.MUST);
 				}
 
 			}else{
@@ -579,11 +579,13 @@ public class IKQueryExpressionParser {
 				//q1 instanceof TermRangeQuery 
 				//q1 instanceof PhraseQuery
 				//others
-				resultQuery.add(q1,Occur.MUST);
+				builder.add(q1,Occur.MUST);
 			}				
 			
-			resultQuery.add(q2,Occur.MUST_NOT);
+			builder.add(q2,Occur.MUST_NOT);
 		}
+		
+		BooleanQuery resultQuery = builder.build();
 		return resultQuery;
 	}	
 	
